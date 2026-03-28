@@ -1,0 +1,325 @@
+/* Scroll-driven 3D cassette ring — scoped to .about-gallery-root */
+
+@property --about-k {
+  syntax: "<number>";
+  initial-value: -1;
+  inherits: true;
+}
+
+@property --about-ang {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.about-gallery-root {
+  --dir: 0;
+  width: 100%;
+  font-family: Saira, system-ui, sans-serif;
+  font-size: clamp(0.625rem, 3vmin, 1.5rem);
+  line-height: 1.25;
+}
+
+.about-gallery-intro {
+  max-width: 42rem;
+  margin-inline: auto;
+  padding: 1rem 1rem 0.5rem;
+  text-align: center;
+  text-wrap: balance;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.about-gallery-scroller,
+.about-gallery-sticky,
+.about-gallery-portal {
+  color: #dedede;
+}
+
+/* Luôn bố cục vòng ngang; cassette tỷ lệ ngang cố định */
+.about-gallery-scroller {
+  container-type: inline-size;
+  container-name: about-gallery;
+  position: relative;
+  width: 100%;
+  height: min(88dvh, 44rem);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  scrollbar-width: none;
+}
+
+.about-gallery-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.about-gallery-scroller::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #000;
+  filter: url("#about-grain");
+  content: "";
+  pointer-events: none;
+}
+
+.about-gallery-track {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  min-width: calc(var(--n) * 100%);
+  height: 100%;
+  animation: about-gallery-k-frames 1s linear forwards;
+  animation-timeline: scroll(nearest inline);
+}
+
+@keyframes about-gallery-k-frames {
+  from {
+    --about-k: -1;
+  }
+
+  to {
+    --about-k: 1;
+  }
+}
+
+.about-gallery-sticky {
+  position: sticky;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 100cqi;
+  max-width: 100%;
+  min-height: min(88dvh, 44rem);
+  height: 100%;
+  padding: 0.5em;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.about-gallery-portal {
+  overflow: hidden;
+  perspective: 50em;
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.about-gallery-root .about-gallery-assembly,
+.about-gallery-root .about-gallery-assembly article {
+  transform-style: preserve-3d;
+}
+
+.about-gallery-assembly {
+  display: grid;
+  grid-template: 1fr / 1fr;
+  place-items: center;
+  --dir: 0;
+  /* Hình chữ nhật ngang (cassette): rộng > cao */
+  --r: 3 / 2;
+  --w: clamp(12rem, min(72cqi, 48vh), 26rem);
+  --z: calc(
+    var(--f, 1.25) * -0.5 * var(--w) / tan(0.5turn / var(--n))
+  );
+  place-self: center;
+  translate: 0 0 var(--z);
+  rotate: var(--dir) calc(1 - var(--dir)) 0
+    calc((var(--about-k) + 0.5) * -1turn);
+}
+
+.about-gallery-assembly article {
+  grid-area: 1 / 1;
+  display: grid;
+  grid-template: 1fr / 1fr;
+  place-items: center;
+  --j: calc(var(--i) / var(--n));
+  --dif-lin: calc(var(--j) - mod(var(--about-k) + 1, 1));
+  --abs-lin: abs(var(--dif-lin));
+  --dif-mid: calc(0.5 - var(--abs-lin));
+  --abs-mid: abs(var(--dif-mid));
+  --dif-arc: calc(2 * (0.5 - var(--abs-mid)));
+  --lim: 0.35;
+  --sel: max(0, calc((var(--lim) - var(--dif-arc)) / var(--lim)));
+  --out: calc(1 - var(--sel));
+  --hov: 0;
+  width: var(--w);
+  aspect-ratio: var(--r);
+  transform: rotate3d(var(--dir), calc(1 - var(--dir)), 0, calc(var(--j) * 1turn))
+    translatez(var(--z)) rotate(calc(var(--dir) * 0.5turn));
+}
+
+.about-gallery-assembly article:hover,
+.about-gallery-assembly article:focus-within {
+  --hov: round(var(--sel));
+}
+
+@supports not (scale: abs(-1)) {
+  .about-gallery-assembly article {
+    --abs-lin: max(var(--dif-lin), calc(-1 * var(--dif-lin)));
+    --abs-mid: max(var(--dif-mid), calc(-1 * var(--dif-mid)));
+  }
+}
+
+.about-gallery-assembly article > header,
+.about-gallery-assembly article > figure {
+  grid-area: 1 / 1;
+  display: grid;
+  grid-template: 1fr / 1fr;
+  place-items: stretch;
+  --about-ang: calc(-45deg + var(--hov) * 180deg);
+  overflow: hidden;
+  position: relative;
+  border: solid 4px transparent;
+  border-radius: 0.5em;
+  backface-visibility: hidden;
+  box-shadow: 5px 5px 13px #000;
+  background:
+    var(--url) 50% / cover padding-box,
+    linear-gradient(#666 0 0) padding-box,
+    repeating-conic-gradient(
+        from var(--about-ang),
+        transparent 0% 15%,
+        color-mix(in srgb, #f48c06 calc(var(--sel) * 100%), #333) 20% 30%,
+        transparent 35% 50%
+      )
+      border-box #121212;
+  background-blend-mode: multiply, normal, normal;
+  isolation: isolate;
+  pointer-events: none;
+  transition: rotate 0.35s ease-out, --about-ang 0.35s ease-out;
+}
+
+.about-gallery-assembly article > header::after,
+.about-gallery-assembly article > figure::after {
+  position: absolute;
+  inset: 0;
+  opacity: var(--out);
+  background: #03071e;
+  mix-blend-mode: color;
+  pointer-events: none;
+  content: "";
+}
+
+.about-gallery-assembly article h2,
+.about-gallery-assembly article em,
+.about-gallery-assembly article img,
+.about-gallery-assembly article a {
+  pointer-events: auto;
+}
+
+.about-gallery-assembly article h2,
+.about-gallery-assembly article em,
+.about-gallery-assembly article figcaption {
+  opacity: round(up, var(--sel));
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.about-gallery-assembly article h2 {
+  font-size: 1.125em;
+  font-weight: 600;
+}
+
+/* Mặt trước = header (tên / số cassette); mặt sau = figure (ảnh) */
+.about-gallery-assembly article > header {
+  rotate: y calc(var(--hov) * 0.5turn);
+  padding: 0.75em 1em;
+  box-sizing: border-box;
+  align-content: center;
+}
+
+.about-gallery-assembly article > figure {
+  rotate: y calc((1 + var(--hov)) * 0.5turn);
+}
+
+.about-gallery-assembly article figure img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: var(--r);
+  object-fit: cover;
+  object-position: var(--pos, 50% 50%);
+}
+
+.about-gallery-assembly article figcaption {
+  align-self: end;
+  padding: 0.5em;
+  background: rgba(255, 255, 255, 0.2);
+  color: #040404;
+  font-family: Caveat, cursive;
+  font-size: max(0.75rem, 0.75em);
+  text-align: right;
+  backdrop-filter: blur(5px) brightness(1.5);
+}
+
+.about-gallery-assembly article figcaption a {
+  color: #370617;
+}
+
+.about-gallery-aside {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.5em;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.about-gallery-aside .about-gallery-box-info-scrollani {
+  pointer-events: auto;
+  margin: 0.5em;
+  border-left: solid 5px #dc3055;
+  padding: 0.75em;
+  box-shadow: 2px 2px 5px hsla(0, 0%, 0%, 0.35);
+  background: #851d40;
+  color: #fff;
+  font:
+    1em/1.25 Ubuntu,
+    "Trebuchet MS",
+    Arial,
+    sans-serif;
+}
+
+@supports (animation-timeline: scroll()) {
+  .about-gallery-aside .about-gallery-box-info-scrollani {
+    display: none;
+  }
+}
+
+.about-gallery-aside kbd {
+  padding: 2px;
+  background: hsla(0, 0%, 0%, 0.35);
+  font:
+    1.1em/1.2 "Ubuntu Mono",
+    Consolas,
+    Monaco,
+    monospace;
+}
+
+.about-gallery-root svg[height="0"][aria-hidden="true"] {
+  position: fixed;
+  width: 0;
+  height: 0;
+}
+
+.about-gallery-assembly article figure img,
+.about-gallery-assembly article figure figcaption {
+  grid-area: 1 / 1;
+}
+
+.about-gallery-assembly article em {
+  max-width: 32em;
+  justify-self: center;
+}
+
+.about-gallery-assembly article.about-gallery-cassette-select {
+  cursor: pointer;
+}
+
+.about-gallery-assembly article.about-gallery-cassette-select[data-selected="true"] {
+  outline: 2px solid #f48c06;
+  outline-offset: 0.25em;
+}
