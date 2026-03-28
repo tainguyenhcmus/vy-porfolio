@@ -1,4 +1,4 @@
-import { Container } from "@/components/ui/Container";
+// import { Container } from "@/components/ui/Container";
 import { AboutScrollGallery } from "@/components/sections/AboutScrollGallery";
 
 export function About() {
