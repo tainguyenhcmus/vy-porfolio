@@ -37,7 +37,7 @@ export function Projects() {
       id="projects"
       className="scroll-mt-20 "
     >
-      <Container>
+      <Container className="max-w-7xl">
         <div className="mt-10 rounded-xl border border-stone-300 bg-page/90 p-8 shadow-sm sm:p-10">
           {!selected ? (
             <p className="text-slate-600">
@@ -47,7 +47,9 @@ export function Projects() {
           ) : (
             <>
               {images.map((image) => (
-                <img key={image} src={image} alt="" />
+                <div className="relative mb-8 overflow-hidden rounded-lg bg-stone-200/80"> 
+                  <img key={image} src={image} alt="" />
+                </div>
               ))}
             </>
           )}
