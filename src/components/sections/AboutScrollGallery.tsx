@@ -3,6 +3,7 @@ import type { CSSProperties, KeyboardEvent } from "react";
 import { aboutCassetteItems } from "@/content/aboutCassettes";
 import { useCassetteSelection } from "@/context/CassetteSelectionContext";
 import "./about-gallery.css";
+import { sectionFolderForCassette } from "@/content/cassetteSectionMap";
 
 function normalizeScrollForK(k: number, scroller: HTMLElement) {
   if (Math.abs(k) <= 0.5) return;
@@ -73,19 +74,6 @@ export function AboutScrollGallery() {
 
   return (
     <div className="about-gallery-root" style={rootStyle}>
-      <svg width="0" height="0" aria-hidden="true">
-        <defs>
-          <filter id="about-grain" colorInterpolationFilters="sRGB">
-            <feTurbulence type="fractalNoise" baseFrequency="7.13" result="noise" />
-            <feColorMatrix in="noise" type="saturate" values="0" result="grey" />
-            <feComponentTransfer in="grey" result="grain">
-              <feFuncA type="linear" slope="0.02" />
-            </feComponentTransfer>
-            <feBlend in="grain" in2="SourceGraphic" mode="normal" />
-          </filter>
-        </defs>
-      </svg>
-
       <div
         ref={scrollerRef}
         className="about-gallery-scroller"
@@ -125,8 +113,7 @@ export function AboutScrollGallery() {
                     }}
                   >
                     <header>
-                      <h2>{item.title}</h2>
-                      <em>{item.subtitle}</em>
+                      <img src={`/src/content/assets/${sectionFolderForCassette(item.id, i)}/image-1.png`} alt="" />
                     </header>
                     <figure>
                       <img src={item.src} alt="" />

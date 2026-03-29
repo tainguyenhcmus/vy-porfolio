@@ -363,6 +363,6 @@
 }
 
 .about-gallery-assembly article.about-gallery-cassette-select[data-selected="true"] {
-  outline: 2px solid #f48c06;
   outline-offset: 0.25em;
+  border-radius: 0.5em;
 }

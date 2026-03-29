@@ -1,6 +1,6 @@
 /**
  * Images for Selected work only — folders under `src/content/assets/`.
- * Not used by the About carousel.
+ * Also used by About scroll gallery previews (first image per folder).
  */
 const raw = import.meta.glob("./assets/**/*.png", {
   eager: true,
