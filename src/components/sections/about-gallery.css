@@ -42,7 +42,6 @@
   container-name: about-gallery;
   position: relative;
   width: 100%;
-  height: min(88dvh, 44rem);
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
@@ -93,7 +92,7 @@
   box-sizing: border-box;
   width: 100cqi;
   max-width: 100%;
-  min-height: min(88dvh, 44rem);
+  min-height: min(80dvh, 30rem);
   height: 100%;
   padding: 0.5em;
   text-align: center;
@@ -105,8 +104,52 @@
   perspective: 50em;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
+  height: 100%;
   display: grid;
   place-items: center;
+  box-sizing: border-box;
+  /* breathing room so 3D ring edges are less likely to clip on narrow widths */
+  padding-inline: clamp(0.25rem, 2.5cqi, 1rem);
+}
+
+@container about-gallery (max-width: 40rem) {
+  .about-gallery-portal {
+    perspective: min(40em, 118cqi);
+    padding-inline: clamp(0.125rem, 1.5cqi, 0.75rem);
+  }
+
+  .about-gallery-sticky {
+    min-height: min(88dvh, 32rem);
+    padding-inline: clamp(0.25em, 2cqi, 0.5em);
+  }
+
+  .about-gallery-assembly {
+    --w: clamp(10.5rem, min(78cqi, 44dvh), 24rem);
+  }
+}
+
+@container about-gallery (max-width: 22.5rem) {
+  .about-gallery-portal {
+    perspective: min(32em, 100cqi);
+    padding-inline: 0.125rem;
+  }
+
+  .about-gallery-sticky {
+    min-height: min(90dvh, 30rem);
+  }
+
+  .about-gallery-assembly {
+    --w: clamp(9.5rem, min(82cqi, 40dvh), 22rem);
+  }
+
+  .about-gallery-assembly article > header {
+    padding: 0.55em 0.65em;
+  }
+
+  .about-gallery-assembly article h2 {
+    font-size: 1.05em;
+  }
 }
 
 .about-gallery-root .about-gallery-assembly,
