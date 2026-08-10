@@ -12,10 +12,14 @@ function normalizeScrollForK(k: number, scroller: HTMLElement) {
   scroller.scrollLeft = 0.5 * (k - Math.sign(k) + 1) * maxScroll;
 }
 
+// Auto-scroll speed while idle, in pixels per second.
+const AUTO_SCROLL_SPEED = 40;
+
 export function AboutScrollGallery() {
   const { selectedId, selectCassette } = useCassetteSelection();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const isPausedRef = useRef(false);
   const items = aboutCassetteItems;
   const n = items.length;
 
@@ -42,9 +46,60 @@ export function AboutScrollGallery() {
     };
     scroller.addEventListener("wheel", onWheel, { passive: false });
 
+    // Slow ambient auto-scroll; pauses on hover/focus/touch so manual
+    // wheel/drag/keyboard scrolling above still works as fast as before.
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    let rafId = 0;
+    let lastTimestamp: number | null = null;
+
+    const tick = (timestamp: number) => {
+      if (lastTimestamp === null) lastTimestamp = timestamp;
+      const deltaSeconds = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+
+      if (!isPausedRef.current) {
+        const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+        if (maxScroll > 0) {
+          scroller.scrollLeft += AUTO_SCROLL_SPEED * deltaSeconds;
+        }
+      }
+
+      rafId = window.requestAnimationFrame(tick);
+    };
+
+    if (!prefersReducedMotion) {
+      rafId = window.requestAnimationFrame(tick);
+    }
+
+    const pause = () => {
+      isPausedRef.current = true;
+    };
+    const resume = () => {
+      isPausedRef.current = false;
+    };
+
+    scroller.addEventListener("mouseenter", pause);
+    scroller.addEventListener("mouseleave", resume);
+    scroller.addEventListener("pointerdown", pause);
+    scroller.addEventListener("pointerup", resume);
+    scroller.addEventListener("pointercancel", resume);
+    scroller.addEventListener("focusin", pause);
+    scroller.addEventListener("focusout", resume);
+
     return () => {
       scroller.removeEventListener("scroll", onScroll);
       scroller.removeEventListener("wheel", onWheel);
+      scroller.removeEventListener("mouseenter", pause);
+      scroller.removeEventListener("mouseleave", resume);
+      scroller.removeEventListener("pointerdown", pause);
+      scroller.removeEventListener("pointerup", resume);
+      scroller.removeEventListener("pointercancel", resume);
+      scroller.removeEventListener("focusin", pause);
+      scroller.removeEventListener("focusout", resume);
+      if (rafId) window.cancelAnimationFrame(rafId);
     };
   }, [n]);
 
@@ -112,13 +167,32 @@ export function AboutScrollGallery() {
                       }
                     }}
                   >
-                    <header>
-                      <img src={`/src/content/assets/${sectionFolderForCassette(item.id, i)}/image-1.png`} alt="" />
-                    </header>
-                    <figure>
-                      <img src={item.src} alt="" />
-                      <figcaption>{item.subtitle}</figcaption>
-                    </figure>
+                    <div className="about-gallery-cassette-box">
+                      <span
+                        className="about-gallery-cassette-edge about-gallery-cassette-edge--top"
+                        aria-hidden="true"
+                      />
+                      <span
+                        className="about-gallery-cassette-edge about-gallery-cassette-edge--bottom"
+                        aria-hidden="true"
+                      />
+                      <span
+                        className="about-gallery-cassette-edge about-gallery-cassette-edge--left"
+                        aria-hidden="true"
+                      />
+                      <span
+                        className="about-gallery-cassette-edge about-gallery-cassette-edge--right"
+                        aria-hidden="true"
+                      />
+                      <header>
+                        <img src={`/src/content/assets/${sectionFolderForCassette(item.id, i)}/image-1.png`} alt="" />
+                      </header>
+                      <figure>
+                        <img src={item.src} alt="" />
+                        <span className="about-gallery-cassette-face" aria-hidden="true" />
+                        <figcaption>{item.subtitle}</figcaption>
+                      </figure>
+                    </div>
                   </article>
                 ))}
               </section>

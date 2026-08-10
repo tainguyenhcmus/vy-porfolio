@@ -92,9 +92,9 @@
   box-sizing: border-box;
   width: 100cqi;
   max-width: 100%;
-  min-height: min(80dvh, 21rem);
+  min-height: min(78dvh, 22rem);
   height: 100%;
-  padding: 0.5em;
+  padding: 0.75em 0.5em;
   text-align: center;
   text-wrap: balance;
 }
@@ -110,40 +110,58 @@
   place-items: center;
   box-sizing: border-box;
   /* breathing room so 3D ring edges are less likely to clip on narrow widths */
-  padding-inline: clamp(0.25rem, 2.5cqi, 1rem);
+  padding-inline: clamp(0.5rem, 3cqi, 1.25rem);
+}
+
+/* Màn hình desktop: container hiện tại (min(78dvh, 22rem)) đang bị chặn ở mức
+   22rem bất kể chiều cao viewport, khiến gallery trông nhỏ. Nới trần này ra và
+   cho vòng cassette to hơn khi có đủ không gian. */
+@media (min-width: 64rem) {
+  .about-gallery-sticky {
+    min-height: min(82dvh, 38rem);
+  }
+
+  .about-gallery-portal {
+    perspective: 66em;
+  }
+
+  .about-gallery-assembly {
+    --w: clamp(13rem, min(56cqi, 54vh), 31rem);
+  }
 }
 
 @container about-gallery (max-width: 40rem) {
   .about-gallery-portal {
     perspective: min(40em, 118cqi);
-    padding-inline: clamp(0.125rem, 1.5cqi, 0.75rem);
+    padding-inline: clamp(0.35rem, 2cqi, 0.85rem);
   }
 
   .about-gallery-sticky {
-    min-height: min(88dvh, 21rem);
-    padding-inline: clamp(0.25em, 2cqi, 0.5em);
+    min-height: min(84dvh, 24rem);
+    padding: 0.65em clamp(0.35em, 2cqi, 0.65em);
   }
 
   .about-gallery-assembly {
-    --w: clamp(10.5rem, min(78cqi, 44dvh), 24rem);
+    --w: clamp(9rem, min(68cqi, 40dvh), 20rem);
   }
 }
 
 @container about-gallery (max-width: 22.5rem) {
   .about-gallery-portal {
     perspective: min(32em, 100cqi);
-    padding-inline: 0.125rem;
+    padding-inline: 0.35rem;
   }
 
   .about-gallery-sticky {
-    min-height: min(90dvh, 21rem);
+    min-height: min(86dvh, 23rem);
+    padding: 0.5em 0.35em;
   }
 
   .about-gallery-assembly {
-    --w: clamp(9.5rem, min(82cqi, 40dvh), 22rem);
+    --w: clamp(8rem, min(70cqi, 36dvh), 18rem);
   }
 
-  .about-gallery-assembly article > header {
+  .about-gallery-assembly article > .about-gallery-cassette-box > header {
     padding: 0.55em 0.65em;
   }
 
@@ -164,7 +182,7 @@
   --dir: 0;
   /* Hình chữ nhật ngang (cassette): rộng > cao */
   --r: 3 / 2;
-  --w: clamp(12rem, min(72cqi, 48vh), 26rem);
+  --w: clamp(10.5rem, min(64cqi, 44vh), 23rem);
   --z: calc(
     var(--f, 1.25) * -0.5 * var(--w) / tan(0.5turn / var(--n))
   );
@@ -189,15 +207,29 @@
   --sel: max(0, calc((var(--lim) - var(--dif-arc)) / var(--lim)));
   --out: calc(1 - var(--sel));
   --hov: 0;
+  /* Độ dày hộp cassette (dạng 3D), tỉ lệ theo kích thước để scale mượt mọi breakpoint */
+  --box-d: calc(var(--w) * 0.12);
+  --box-h: calc(var(--w) * 2 / 3);
   width: var(--w);
   aspect-ratio: var(--r);
+  scale: 1;
   transform: rotate3d(var(--dir), calc(1 - var(--dir)), 0, calc(var(--j) * 1turn))
     translatez(var(--z)) rotate(calc(var(--dir) * 0.5turn));
+  transition: scale 0.3s ease-out;
 }
 
 .about-gallery-assembly article:hover,
 .about-gallery-assembly article:focus-within {
   --hov: round(var(--sel));
+}
+
+/* Chỉ cassette đang được rê chuột vào mới phóng to, các cassette còn lại giữ
+   nguyên kích thước — nổi bật đúng một chiếc thay vì zoom cả vòng. */
+@media (hover: hover) and (pointer: fine) {
+  .about-gallery-assembly article:hover {
+    scale: 1.2;
+    z-index: 2;
+  }
 }
 
 @supports not (scale: abs(-1)) {
@@ -207,15 +239,28 @@
   }
 }
 
-.about-gallery-assembly article > header,
-.about-gallery-assembly article > figure {
+/* Khối 3D của cassette: header (mặt trước) và figure (mặt sau) được đặt cách
+   nhau --box-d để tạo độ dày thật; cả khối lật 180° cùng lúc khi hover thay vì
+   lật riêng từng mặt phẳng như trước — trông giống một chiếc hộp thật hơn. */
+.about-gallery-cassette-box {
   grid-area: 1 / 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  rotate: y calc(var(--hov) * 0.5turn);
+  transition: rotate 0.35s ease-out;
+}
+
+.about-gallery-assembly article > .about-gallery-cassette-box > header,
+.about-gallery-assembly article > .about-gallery-cassette-box > figure {
+  position: absolute;
+  inset: 0;
   display: grid;
   grid-template: 1fr / 1fr;
   place-items: stretch;
   --about-ang: calc(-45deg + var(--hov) * 180deg);
   overflow: hidden;
-  position: relative;
   border: solid 4px transparent;
   border-radius: 0.5em;
   backface-visibility: hidden;
@@ -233,11 +278,11 @@
   background-blend-mode: multiply, normal, normal;
   isolation: isolate;
   pointer-events: none;
-  transition: rotate 0.35s ease-out, --about-ang 0.35s ease-out;
+  transition: --about-ang 0.35s ease-out;
 }
 
-.about-gallery-assembly article > header::after,
-.about-gallery-assembly article > figure::after {
+.about-gallery-assembly article > .about-gallery-cassette-box > header::after,
+.about-gallery-assembly article > .about-gallery-cassette-box > figure::after {
   position: absolute;
   inset: 0;
   opacity: var(--out);
@@ -245,6 +290,61 @@
   mix-blend-mode: color;
   pointer-events: none;
   content: "";
+}
+
+/* Mặt trước (header) đẩy ra +độ dày/2; mặt sau (figure) lật 180° rồi đẩy ra
+   cùng khoảng cách nên nằm đúng ở phía đối diện — cùng thuộc một khối rắn. */
+.about-gallery-assembly article > .about-gallery-cassette-box > header {
+  transform: translateZ(calc(var(--box-d) / 2));
+}
+
+.about-gallery-assembly article > .about-gallery-cassette-box > figure {
+  transform: rotateY(180deg) translateZ(calc(var(--box-d) / 2));
+}
+
+/* 4 cạnh hộp nối mặt trước/sau lại — tạo cảm giác độ dày thật (dạng 3D) */
+.about-gallery-cassette-edge {
+  position: absolute;
+  pointer-events: none;
+  backface-visibility: hidden;
+  border-radius: 0.12em;
+}
+
+.about-gallery-cassette-edge--left,
+.about-gallery-cassette-edge--right {
+  top: 0;
+  width: var(--box-d);
+  height: 100%;
+  background: linear-gradient(90deg, #050505, #313131 45%, #0a0a0a);
+}
+
+.about-gallery-cassette-edge--left {
+  left: calc((100% - var(--box-d)) / 2);
+  transform: rotateY(-90deg) translateZ(calc(var(--w) / 2));
+}
+
+.about-gallery-cassette-edge--right {
+  left: calc((100% - var(--box-d)) / 2);
+  transform: rotateY(90deg) translateZ(calc(var(--w) / 2));
+}
+
+.about-gallery-cassette-edge--top,
+.about-gallery-cassette-edge--bottom {
+  left: 0;
+  width: 100%;
+  height: var(--box-d);
+  background: linear-gradient(180deg, #3a3a3a, #050505 65%);
+}
+
+.about-gallery-cassette-edge--top {
+  top: calc((100% - var(--box-d)) / 2);
+  transform: rotateX(90deg) translateZ(calc(var(--box-h) / 2));
+}
+
+.about-gallery-cassette-edge--bottom {
+  top: calc((100% - var(--box-d)) / 2);
+  transform: rotateX(-90deg) translateZ(calc(var(--box-h) / 2));
+  background: linear-gradient(180deg, #050505, #1c1c1c 65%);
 }
 
 .about-gallery-assembly article h2,
@@ -266,16 +366,10 @@
   font-weight: 600;
 }
 
-/* Mặt trước = header (tên / số cassette); mặt sau = figure (ảnh) */
-.about-gallery-assembly article > header {
-  rotate: y calc(var(--hov) * 0.5turn);
+.about-gallery-assembly article > .about-gallery-cassette-box > header {
   padding: 0.75em 1em;
   box-sizing: border-box;
   align-content: center;
-}
-
-.about-gallery-assembly article > figure {
-  rotate: y calc((1 + var(--hov)) * 0.5turn);
 }
 
 .about-gallery-assembly article figure img {
@@ -349,8 +443,21 @@
 }
 
 .about-gallery-assembly article figure img,
-.about-gallery-assembly article figure figcaption {
+.about-gallery-assembly article figure figcaption,
+.about-gallery-assembly article figure .about-gallery-cassette-face {
   grid-area: 1 / 1;
+}
+
+/* Lớp phủ mô phỏng khoang băng cassette (2 cuộn băng + vít góc) lên mặt ảnh,
+   nằm trên ảnh nhưng dưới figcaption nhờ thứ tự trong DOM. */
+.about-gallery-cassette-face {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 200'%3E%3Ccircle cx='22' cy='20' r='6' fill='rgba(0,0,0,0.35)' stroke='rgba(255,255,255,0.55)' stroke-width='1.5'/%3E%3Ccircle cx='278' cy='20' r='6' fill='rgba(0,0,0,0.35)' stroke='rgba(255,255,255,0.55)' stroke-width='1.5'/%3E%3Ccircle cx='22' cy='172' r='6' fill='rgba(0,0,0,0.35)' stroke='rgba(255,255,255,0.55)' stroke-width='1.5'/%3E%3Ccircle cx='278' cy='172' r='6' fill='rgba(0,0,0,0.35)' stroke='rgba(255,255,255,0.55)' stroke-width='1.5'/%3E%3Cline x1='97' y1='128' x2='203' y2='128' stroke='rgba(255,255,255,0.5)' stroke-width='2'/%3E%3Ccircle cx='102' cy='128' r='27' fill='none' stroke='rgba(255,255,255,0.65)' stroke-width='2'/%3E%3Ccircle cx='102' cy='128' r='9' fill='rgba(0,0,0,0.4)' stroke='rgba(255,255,255,0.7)' stroke-width='1.5'/%3E%3Cg stroke='rgba(255,255,255,0.5)' stroke-width='1.5'%3E%3Cline x1='102' y1='118' x2='102' y2='138'/%3E%3Cline x1='92' y1='128' x2='112' y2='128'/%3E%3Cline x1='95' y1='121' x2='109' y2='135'/%3E%3Cline x1='109' y1='121' x2='95' y2='135'/%3E%3C/g%3E%3Ccircle cx='198' cy='128' r='27' fill='none' stroke='rgba(255,255,255,0.65)' stroke-width='2'/%3E%3Ccircle cx='198' cy='128' r='9' fill='rgba(0,0,0,0.4)' stroke='rgba(255,255,255,0.7)' stroke-width='1.5'/%3E%3Cg stroke='rgba(255,255,255,0.5)' stroke-width='1.5'%3E%3Cline x1='198' y1='118' x2='198' y2='138'/%3E%3Cline x1='188' y1='128' x2='208' y2='128'/%3E%3Cline x1='191' y1='121' x2='205' y2='135'/%3E%3Cline x1='205' y1='121' x2='191' y2='135'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .about-gallery-assembly article em {

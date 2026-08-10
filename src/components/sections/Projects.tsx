@@ -23,7 +23,6 @@ export function Projects() {
     () => (sectionFolder ? getSectionImages(sectionFolder) : []),
     [sectionFolder],
   );
-  console.log("🚀 ~ Projects ~ images:", images)
 
   useEffect(() => {
     if (images.length <= 1) return;
@@ -33,25 +32,29 @@ export function Projects() {
   }, [images]);
 
   return (
-    <section
-      id="projects"
-      className="scroll-mt-20 "
-    >
-      <Container className="max-w-7xl">
-        <div className="mt-10 rounded-xl border border-stone-300 bg-page/90 p-8 shadow-sm sm:p-10">
+    <section id="projects" className="scroll-mt-20 py-12 sm:py-16">
+      <Container className="max-w-6xl">
+        <div className="rounded-xl border border-stone-300 bg-page/90 p-5 shadow-sm sm:p-8">
           {!selected ? (
             <p className="text-slate-600">
               No cassette selected yet. Click one in the gallery above to load its
               section here.
             </p>
           ) : (
-            <>
+            <div className="flex flex-col gap-5 sm:gap-6">
               {images.map((image) => (
-                <div className="relative mb-8 overflow-hidden rounded-lg bg-stone-200/80"> 
-                  <img key={image} src={image} alt="" />
+                <div
+                  key={image}
+                  className="relative overflow-hidden rounded-lg bg-stone-200/80"
+                >
+                  <img
+                    src={image}
+                    alt=""
+                    className="block h-auto w-full"
+                  />
                 </div>
               ))}
-            </>
+            </div>
           )}
         </div>
       </Container>

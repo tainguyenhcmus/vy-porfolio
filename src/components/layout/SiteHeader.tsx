@@ -8,7 +8,7 @@ export function SiteHeader() {
         <a href="#" className="font-semibold text-slate-900">
           {site.name}
         </a>
-        <nav className="flex gap-6 text-sm text-slate-600">
+        <nav className="flex gap-5 text-sm text-slate-600 sm:gap-6">
           {site.nav.map((item) => (
             <a
               key={item.id}

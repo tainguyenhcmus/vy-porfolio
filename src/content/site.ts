@@ -1,7 +1,7 @@
 export const site = {
-  name: "Your Name",
-  title: "Designer & developer",
-  email: "hello@example.com",
+  name: "Vy Bui",
+  title: "Creative",
+  email: "librvy16@gmail.com",
   social: {
     github: "https://github.com/",
     linkedin: "https://linkedin.com/in/",
